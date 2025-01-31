@@ -1,4 +1,4 @@
-# version: '3.8'
+version: '3.8'
 
 services:
   jenkins-docker:
@@ -37,21 +37,18 @@ services:
     networks:
       - jenkins
 
-  flask-app:
-    build:
-      context: ./flask-app
-    ports:
-      - "5000:5000"
+  jenkins-agent:
+    image: jenkins/inbound-agent
+    container_name: jenkins-agent
+    restart: on-failure
+    environment:
+      - JENKINS_URL=http://my-jenkins:8080
+      - JENKINS_AGENT_NAME=docker-agent
+      - JENKINS_SECRET=5739cdf8039e624f34725c3ba4952f5787aad03aeda94ec4205df354dbaa658f
     networks:
       - jenkins
-
-  node-app:
-    build:
-      context: ./node-app
-    ports:
-      - "3000:3000"
-    networks:
-      - jenkins
+    depends_on:
+      - my-jenkins
 
 networks:
   jenkins:
