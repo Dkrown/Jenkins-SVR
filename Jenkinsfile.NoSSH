@@ -4,9 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main',
-                    credentialsId: 'github-ssh-key', 
-                    url: 'git@github.com:Dkrown/Jenkins-SVR.git'
+                git 'git@github.com:Dkrown/Jenkins-SVR.git'
             }
         }
 
