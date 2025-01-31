@@ -56,3 +56,54 @@ Jenkins Agent (docker-agent) → Will now handle all builds.
 ===============================================================================
 +++ This keeps Jenkins secure and optimized, preventing performance issues. +++
 ===============================================================================
+
+Bonus:
+To push to 'github' using SSH follow these steps
+------------------------------------------------
+Configure Git for GitHub:
+-------------------------
+git config --global user.name "YourGitHubUsername"
+git config --global user.email "youremail@example.com"
+
+Generate SSH Key (if not already set up):
+----------------------------------------
+ssh-keygen -t rsa -b 4096 -C "youremail@example.com"
+
+Copy the SSH key and add it to GitHub:
+cat ~/.ssh/id_rsa.pub
+
+Go to GitHub → Settings → SSH Keys → New SSH Key → Paste the key.
+
+Test GitHub SSH Connection:
+-------------------------
+ssh -T git@github.com
+
+Switch Git to Use SSH for the Remote Repository:
+-----------------------------------------------
+git remote set-url origin git@github.com:YourGitHubUsername/Jenkins-SVR.git
+
+Verify the change with this command: git remote -v
+It should show something like these:
+	origin  git@github.com:YourGitHubUsername/Jenkins-SVR.git (fetch)
+	origin  git@github.com:YourGitHubUsername/Jenkins-SVR.git (push)
+
+Initialize Git in the Local Directory:
+-------------------------------------
+cd ~/Jenkins-SVR
+git init
+
+Add the GitHub repository as the remote origin:
+git remote add origin git@github.com:YourGitHubUsername/Jenkins-SVR.git
+
+Stage and Commit Files:
+----------------------
+Stage all files in the directory:	git add .
+Commit the files with a message:	git commit -m "Initial commit - Jenkins Docker Setup"
+Push the Directory to GitHub:		git branch -M main
+					git push -u origin main
+
+Verify on GitHub:
+----------------
+Go to your GitHub repository (https://github.com/YourGitHubUsername/Jenkins-SVR).
+Refresh the page—you should see your Jenkins-SVR files uploaded.
+
