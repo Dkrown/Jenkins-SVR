@@ -107,3 +107,73 @@ Verify on GitHub:
 Go to your GitHub repository (https://github.com/YourGitHubUsername/Jenkins-SVR).
 Refresh the page—you should see your Jenkins-SVR files uploaded.
 
+
+SSH authentication issue when Jenkins is trying to fetch your GitHub repository:
+=============================================================================
+"Host key verification failed. Fatal: Could not read from remote repository."
+=============================================================================
+This means Jenkins is unable to verify GitHub's SSH key, preventing access to the repository.
+
+Steps to fix the issue:
+=======================
+If jobs run in 'jenkins-agent', run this command: docker exec -it jenkins-agent bash
+Then, inside the container, test SSH access to GitHub: ssh -T git@github.com
+If prompted authentication failed with: Permission denied (publickey).
+You need to configure SSH keys inside the container as demonstrated below:
+
+Log into your Jenkins container [or server]:
+--------------------------------------------
+docker exec -it jenkins-agent bash
+
+Generate SSH key pair:
+----------------------
+ssh-keygen -t rsa -b 4096 -C "whatever-name"
+
+Add/copy the SSH key to GitHub:
+-------------------------------
+cat ~/.ssh/id_rsa.pub
+
+Ensure Jenkins can read the key:
+--------------------------------
+chmod 600 ~/.ssh/id_rsa
+chmod 644 ~/.ssh/id_rsa.pub
+chmod 700 ~/.ssh
+
+Ensure SSH Agent is Running and Using the Key:
+----------------------------------------------
+eval $(ssh-agent -s)  # Start SSH agent
+ssh-add ~/.ssh/jenkins-agent-github  # Add the SSH key
+
+Or start the SSH agent manually:
+--------------------------------
+eval `ssh-agent`
+ssh-add ~/.ssh/jenkins-agent-github
+
+Or running the SSH command explicitly with your private key:
+------------------------------------------------------------
+ssh -i ~/.ssh/jenkins-agent-github -T git@github.com
+
+Create SSH Config File:
+-----------------------
+echo "Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/jenkins-agent-github
+  IdentitiesOnly yes" > ~/.ssh/config
+
+Set Correct Permissions:
+------------------------
+chmod 600 ~/.ssh/config
+
+Verify SSH Authentication:
+--------------------------
+ssh -T git@github.com
+
+If everything is correct, it should return:
+-------------------------------------------
+Hi Dkrown! You've successfully authenticated, but GitHub does not provide shell access.
+
+Restart Jenkins & Retry Pipeline:
+---------------------------------
+docker compose down
+docker compose up -d
