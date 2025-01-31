@@ -1,0 +1,29 @@
+# version: '3.8'
+
+services:
+  my-jenkins:
+    build:
+      context: ./Dockerfiles   # Path to the sub-directory where Dockerfile is located
+      dockerfile: Dockerfile    # Ensure this matches the actual file name
+    container_name: my-jenkins
+    restart: on-failure
+    environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    networks:
+      - jenkins
+
+networks:
+  jenkins:
+    driver: bridge
+
+volumes:
+  jenkins-docker-certs:
+  jenkins-data:

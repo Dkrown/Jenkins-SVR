@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  jenkins-docker:
+    image: docker:dind
+    container_name: jenkins-docker
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-data:/var/jenkins_home
+    ports:
+      - "2376:2376"
+    networks:
+      jenkins:
+        aliases:
+          - docker
+    command: --storage-driver overlay2
+
+  my-jenkins:
+    build:
+      context: ./Dockerfiles
+      dockerfile: Dockerfile
+    container_name: my-jenkins
+    restart: on-failure
+    environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    networks:
+      - jenkins
+
+  jenkins-agent:
+    image: jenkins/inbound-agent
+    container_name: jenkins-agent
+    restart: on-failure
+    environment:
+      - JENKINS_URL=http://my-jenkins:8080
+      - JENKINS_AGENT_NAME=docker-agent
+      - JENKINS_SECRET=5739cdf8039e624f34725c3ba4952f5787aad03aeda94ec4205df354dbaa658f
+    networks:
+      - jenkins
+    depends_on:
+      - my-jenkins
+
+networks:
+  jenkins:
+    driver: bridge
+
+volumes:
+  jenkins-docker-certs:
+  jenkins-data:
