@@ -49,6 +49,8 @@ services:
       - JENKINS_SECRET=5739cdf8039e624f34725c3ba4952f5787aad03aeda94ec4205df354dbaa658f
     networks:
       - jenkins
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Allow Jenkins Agent to access Docker Daemon
 
   flask-app:
     build:
